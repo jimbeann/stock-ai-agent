@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Stock Analyzer</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>📈 AI Stock Analyzer</h1>
+
+        <form method="post" action="/analyze">
+            <input type="text" name="stock" placeholder="Enter stock (e.g. TCS, AAPL)" required>
+            <button type="submit">Analyze</button>
+        </form>
+
+        {% if result %}
+            <div class="result">
+                <h2>Result for {{stock}}</h2>
+                <pre>{{result}}</pre>
+            </div>
+        {% endif %}
+    </div>
+
+</body>
+</html>
