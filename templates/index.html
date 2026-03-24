@@ -1,26 +1,48 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>AI Stock Analyzer</title>
+    <title>AI Stock Analyzer V2</title>
     <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-    <div class="container">
-        <h1>📈 AI Stock Analyzer</h1>
+<div class="container">
+    <h1>📈 AI Stock Analyzer V2</h1>
 
-        <form method="post" action="/analyze">
-            <input type="text" name="stock" placeholder="Enter stock (e.g. TCS, AAPL)" required>
-            <button type="submit">Analyze</button>
-        </form>
+    <form method="post" action="/analyze">
+        <input type="text" name="stock" placeholder="Enter stock (e.g. TCS, AAPL)" required>
+        <button type="submit">Analyze</button>
+    </form>
 
-        {% if result %}
-            <div class="result">
-                <h2>Result for {{stock}}</h2>
-                <pre>{{result}}</pre>
-            </div>
-        {% endif %}
-    </div>
+    {% if result %}
+        <div class="result">
+            <h2>{{stock}} Analysis</h2>
+            <pre>{{result}}</pre>
+        </div>
+
+        <canvas id="stockChart"></canvas>
+    {% endif %}
+</div>
+
+<script>
+    const chartData = {{ chart_data | tojson | safe if chart_data else 'null' }};
+
+    if (chartData) {
+        const ctx = document.getElementById('stockChart').getContext('2d');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData.dates,
+                datasets: [{
+                    label: 'Stock Price',
+                    data: chartData.prices
+                }]
+            }
+        });
+    }
+</script>
 
 </body>
 </html>
