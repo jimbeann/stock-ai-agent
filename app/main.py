@@ -12,9 +12,11 @@ def home(request: Request):
 
 @app.post("/analyze", response_class=HTMLResponse)
 async def analyze(request: Request, stock: str = Form(...)):
-    result = analyze_stock(stock)
+    result, chart_data = analyze_stock(stock)
+
     return templates.TemplateResponse("index.html", {
         "request": request,
         "result": result,
-        "stock": stock
+        "stock": stock,
+        "chart_data": chart_data
     })
