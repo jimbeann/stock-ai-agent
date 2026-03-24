@@ -1,0 +1,19 @@
+stock-ai-agent/
+│
+├── app/
+│   ├── main.py
+│   ├── agent.py
+│   └── tools/
+│       ├── finance.py
+│       └── news.py
+│
+├── templates/
+│   └── index.html
+│
+├── static/
+│   └── style.css
+│
+├── .env
+├── .gitignore
+├── requirements.txt
+└── README.md
