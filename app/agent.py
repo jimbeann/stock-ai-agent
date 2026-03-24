@@ -1,52 +1,11 @@
 import requests
-import yfinance as yf
-import os
-from dotenv import load_dotenv
 
-from app.rag import store_news, query_news
+from app.tools.finance import get_financials, get_price_history
+from app.tools.news import get_news
 from app.tools.sentiment import simple_sentiment
+from app.rag import store_news, query_news
 
-load_dotenv()
-
-NEWS_API_KEY = os.getenv("NEWS_API_KEY")
 OLLAMA_URL = "http://localhost:11434/api/generate"
-
-
-def get_financials(stock):
-    ticker = yf.Ticker(stock)
-    info = ticker.info
-
-    return {
-        "name": info.get("longName"),
-        "sector": info.get("sector"),
-        "marketCap": info.get("marketCap"),
-        "pe": info.get("trailingPE"),
-        "revenueGrowth": info.get("revenueGrowth"),
-    }
-
-
-def get_news(stock):
-    if not NEWS_API_KEY:
-        return ["No API key provided"]
-
-    url = f"https://newsapi.org/v2/everything?q={stock}&apiKey={NEWS_API_KEY}"
-
-    try:
-        res = requests.get(url).json()
-        articles = res.get("articles", [])[:5]
-        return [a["title"] for a in articles]
-    except:
-        return ["Error fetching news"]
-
-
-def get_price_history(stock):
-    ticker = yf.Ticker(stock)
-    hist = ticker.history(period="1mo")
-
-    return {
-        "dates": hist.index.strftime("%Y-%m-%d").tolist(),
-        "prices": hist["Close"].tolist()
-    }
 
 
 def call_llm(prompt):
@@ -62,10 +21,14 @@ def analyze_stock(stock):
     financials = get_financials(stock)
     news = get_news(stock)
 
+    # RAG
     store_news(news)
     relevant_news = query_news(stock)
+
+    # Sentiment
     sentiment = simple_sentiment(news)
 
+    # Chart
     chart_data = get_price_history(stock)
 
     prompt = f"""
