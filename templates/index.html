@@ -5,25 +5,43 @@
     <link rel="stylesheet" href="/static/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
 
 <div class="container">
-    <h1>📈 AI Stock Analyzer V2</h1>
 
-    <form method="post" action="/analyze">
-        <input type="text" name="stock" placeholder="Enter stock (e.g. TCS, AAPL)" required>
+    <h1>📈 AI Stock Analyzer</h1>
+    <p class="subtitle">Analyze stocks using AI-powered insights</p>
+
+    <form method="post" action="/analyze" onsubmit="showLoading()">
+        <input type="text" name="stock" placeholder="Enter stock (e.g. TCS, INFY, AAPL)" required>
         <button type="submit">Analyze</button>
     </form>
 
+    <!-- Loading Indicator -->
+    <div id="loading" class="loading" style="display:none;">
+        ⏳ Analyzing... please wait
+    </div>
+
     {% if result %}
-        <div class="result">
-            <h2>{{stock}} Analysis</h2>
+        <div class="result-card">
+            <h2>📊 {{stock}} Analysis</h2>
             <pre>{{result}}</pre>
         </div>
 
-        <canvas id="stockChart"></canvas>
+        <div class="chart-card">
+            <h3>📉 Price Trend (Last 1 Month)</h3>
+            <canvas id="stockChart"></canvas>
+        </div>
     {% endif %}
+
 </div>
+
+<script>
+function showLoading() {
+    document.getElementById("loading").style.display = "block";
+}
+</script>
 
 <script>
     const chartData = {{ chart_data | tojson | safe if chart_data else 'null' }};
@@ -37,8 +55,28 @@
                 labels: chartData.dates,
                 datasets: [{
                     label: 'Stock Price',
-                    data: chartData.prices
+                    data: chartData.prices,
+                    borderWidth: 2,
+                    tension: 0.3
                 }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: 'white'
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: 'white' }
+                    },
+                    y: {
+                        ticks: { color: 'white' }
+                    }
+                }
             }
         });
     }
