@@ -3,6 +3,9 @@ import yfinance as yf
 import os
 from dotenv import load_dotenv
 
+from app.rag import store_news, query_news
+from app.tools.sentiment import simple_sentiment
+
 load_dotenv()
 
 NEWS_API_KEY = os.getenv("NEWS_API_KEY")
@@ -36,6 +39,16 @@ def get_news(stock):
         return ["Error fetching news"]
 
 
+def get_price_history(stock):
+    ticker = yf.Ticker(stock)
+    hist = ticker.history(period="1mo")
+
+    return {
+        "dates": hist.index.strftime("%Y-%m-%d").tolist(),
+        "prices": hist["Close"].tolist()
+    }
+
+
 def call_llm(prompt):
     response = requests.post(OLLAMA_URL, json={
         "model": "phi3",
@@ -49,24 +62,33 @@ def analyze_stock(stock):
     financials = get_financials(stock)
     news = get_news(stock)
 
-    prompt = f"""
-You are a stock analyst.
+    store_news(news)
+    relevant_news = query_news(stock)
+    sentiment = simple_sentiment(news)
 
-Analyze this stock:
+    chart_data = get_price_history(stock)
+
+    prompt = f"""
+You are a professional stock analyst.
 
 Stock: {stock}
 
 Financials:
 {financials}
 
-News:
-{news}
+Relevant News:
+{relevant_news}
 
-Give:
-1. Financial Summary
-2. News Sentiment
-3. Risks
-4. Final Insight
+Sentiment: {sentiment}
+
+Provide output in this format:
+
+### Financial Health
+### News Impact
+### Risks
+### Final Verdict
 """
 
-    return call_llm(prompt)
+    analysis = call_llm(prompt)
+
+    return analysis, chart_data
