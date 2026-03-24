@@ -3,9 +3,11 @@ stock-ai-agent/
 ├── app/
 │   ├── main.py
 │   ├── agent.py
+│   ├── rag.py
 │   └── tools/
 │       ├── finance.py
-│       └── news.py
+│       ├── news.py
+│       └── sentiment.py
 │
 ├── templates/
 │   └── index.html
